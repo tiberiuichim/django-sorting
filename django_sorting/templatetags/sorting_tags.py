@@ -1,6 +1,7 @@
 from django import template
 from django.http import Http404
 from django.conf import settings
+from django.utils.translation import ugettext as _
 
 register = template.Library()
 
@@ -21,7 +22,7 @@ def anchor(parser, token):
     """
     bits = [b.strip('"\'') for b in token.split_contents()]
     if len(bits) < 2:
-        raise TemplateSyntaxError, "anchor tag takes at least 1 argument"
+        raise template.TemplateSyntaxError, "anchor tag takes at least 1 argument"
     try:
         title = bits[2]
     except IndexError:
@@ -68,19 +69,20 @@ class SortAnchorNode(template.Node):
         else:
             urlappend = ''
         if icon:
-            title = "%s %s" % (self.title, icon)
+            title = "%s %s" % (_(self.title), icon)
         else:
-            title = self.title
+            title = _(self.title)
 
         url = '%s?sort=%s%s' % (request.path, self.field, urlappend)
-        return '<a href="%s" title="%s">%s</a>' % (url, self.title, title)
+        return '<a href="%s" title="%s">%s</a>' % (url, _(self.title), title)
 
 
 def autosort(parser, token):
     bits = [b.strip('"\'') for b in token.split_contents()]
     if len(bits) != 2:
-        raise TemplateSyntaxError, "autosort tag takes exactly one argument"
+        raise template.TemplateSyntaxError, "autosort tag takes exactly one argument"
     return SortedDataNode(bits[1])
+
 
 class SortedDataNode(template.Node):
     """
